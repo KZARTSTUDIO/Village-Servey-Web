@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village Waste Management Survey & Reporting</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Hind Siliguri', 'sans-serif'],
+                        bengali: ['Hind Siliguri', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(209, 250, 229, 0.5);
+        }
+        .bg-pattern {
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#10b981 0.75px, transparent 0.75px), radial-gradient(#10b981 0.75px, #f0fdf4 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            background-opacity: 0.15;
+        }
+    </style>
+</head>
+<body class="bg-pattern min-h-screen text-slate-800 font-sans antialiased flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-emerald-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-200">
+                    <i class="fa-solid font-bold text-lg fa-leaf"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg sm:text-xl text-slate-800 leading-tight" id="nav-title">Gram Swachhata</h1>
+                    <p class="text-xs text-emerald-600 font-medium hidden sm:block" id="nav-subtitle">Village Sanitation & Waste Survey</p>
+                </div>
+            </div>
+
+            <!-- Controls: Language Toggle & User Auth status -->
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <!-- Language Toggle Button -->
+                <button id="lang-toggle-btn" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 font-medium text-sm transition-all shadow-sm">
+                    <i class="fa-solid fa-language text-base"></i>
+                    <span id="lang-label">বাংলা</span>
+                </button>
+
+                <!-- User Profile / Auth State UI -->
+                <div id="auth-section" class="flex items-center space-x-2">
+                    <button id="google-login-btn" class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-all shadow-md shadow-emerald-200 active:scale-95">
+                        <i class="fa-brands fa-google"></i>
+                        <span id="login-btn-text">Sign in with Google</span>
+                    </button>
+
+                    <div id="user-profile-badge" class="hidden flex items-center space-x-2 bg-slate-100 p-1.5 pr-3 rounded-full border border-slate-200">
+                        <img id="user-avatar" class="w-8 h-8 rounded-full border border-emerald-400" src="" alt="User">
+                        <span id="user-display-name" class="text-xs font-semibold text-slate-700 max-w-[100px] sm:max-w-[150px] truncate">User</span>
+                        <button id="logout-btn" class="text-slate-400 hover:text-red-500 ml-1 p-1 rounded-full transition" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+        <!-- Banner Alert when not logged in -->
+        <div id="login-banner" class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-emerald-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-sm">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-sm sm:text-base" id="banner-title">Google Authentication Required</h3>
+                    <p class="text-xs sm:text-sm text-slate-600" id="banner-desc">Please log in with Google to fill out or view survey details securely.</p>
+                </div>
+            </div>
+            <button id="banner-login-btn" class="shrink-0 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow transition">
+                <i class="fa-brands fa-google mr-2"></i><span id="banner-btn-text">Sign In Now</span>
+            </button>
+        </div>
+
+        <!-- Role Badge Header (Shown if Admin) -->
+        <div id="admin-notice-badge" class="hidden mb-6 p-4 rounded-2xl bg-indigo-900 text-white shadow-lg flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-700 flex items-center justify-center text-amber-300">
+                    <i class="fa-solid fa-user-shield text-lg"></i>
+                </div>
+                <div>
+                    <span class="bg-indigo-700 text-amber-300 text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider">Admin Granted</span>
+                    <h2 class="text-base font-bold" id="admin-welcome-text">Welcome Admin, Srijan Besra!</h2>
+                    <p class="text-xs text-indigo-200" id="admin-welcome-sub">You have total access to view and manage all village survey submissions.</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="toggle-view-btn" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-indigo-950 font-bold text-xs sm:text-sm rounded-lg transition shadow">
+                    <i class="fa-solid fa-table-list mr-1.5"></i><span id="toggle-view-text">Switch to Admin Dashboard</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 1: SURVEY FORM SECTION -->
+        <div id="survey-form-view" class="space-y-8">
+
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full uppercase tracking-wider" id="form-badge">Village Observation</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900" id="form-main-title">My Village Waste & Sanitation Survey</h2>
+                <p class="text-slate-600 text-xs sm:text-sm" id="form-main-desc">Help us keep our rural communities clean and hygienic by filling out this observation questionnaire.</p>
+            </div>
+
+            <form id="surveyForm" class="space-y-8">
+
+                <!-- User Real Name Field (Mandatory) -->
+                <div class="glass-card rounded-2xl p-5 sm:p-7 shadow-lg border-l-4 border-l-emerald-500">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center" id="sec0-title">
+                        <i class="fa-solid fa-id-card text-emerald-600 mr-2"></i> Survey Participant Information
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-real-name">Full Name (Real Name) *</label>
+                            <input type="text" id="user-full-name" required placeholder="e.g. Srijan Besra" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white/70">
+                            <p class="text-[11px] text-slate-500 mt-1" id="hint-real-name">Enter your complete verified name.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-email">Logged In Email</label>
+                            <input type="email" id="user-email-display" readonly disabled placeholder="Login required" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 1: General Information About My Village -->
+                <div class="glass-card rounded-2xl p-5 sm:p-7 shadow-lg">
+                    <div class="border-b border-slate-200 pb-3 mb-5">
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Part 1</span>
+                        <h3 class="text-lg font-bold text-slate-800" id="sec1-title">10. General Information About My Village</h3>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-village-name">Name of the village *</label>
+                            <input type="text" id="villageName" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-gram-panchayat">Gram Panchayat *</label>
+                            <input type="text" id="gramPanchayat" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-block">Block *</label>
+                            <input type="text" id="block" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-district">District *</label>
+                            <input type="text" id="district" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-state">State</label>
+                            <input type="text" id="state" value="West Bengal" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 font-semibold text-sm cursor-not-allowed">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-households">Approximate number of households (if known)</label>
+                            <input type="number" id="households" min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm" placeholder="e.g. 250">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Observation Points -->
+                <div class="glass-card rounded-2xl p-5 sm:p-7 shadow-lg">
+                    <div class="border-b border-slate-200 pb-3 mb-5">
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Part 2</span>
+                        <h3 class="text-lg font-bold text-slate-800" id="sec2-title">11. Observation Points & Field Notes</h3>
+                        <p class="text-xs text-slate-500 mt-1" id="sec2-desc">What did you observe at the following locations in your village?</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 items-center p-3 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span class="text-sm font-semibold text-slate-700 md:col-span-1" id="obs-roads">Roads and streets</span>
+                            <input type="text" id="obs_roads" placeholder="Observation details..." class="md:col-span-2 px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 items-center p-3 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span class="text-sm font-semibold text-slate-700 md:col-span-1" id="obs-school">School surroundings</span>
+                            <input type="text" id="obs_school" placeholder="Observation details..." class="md:col-span-2 px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 items-center p-3 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span class="text-sm font-semibold text-slate-700 md:col-span-1" id="obs-market">Local market or shops</span>
+                            <input type="text" id="obs_market" placeholder="Observation details..." class="md:col-span-2 px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 items-center p-3 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span class="text-sm font-semibold text-slate-700 md:col-span-1" id="obs-water">Public water points</span>
+                            <input type="text" id="obs_water" placeholder="Observation details..." class="md:col-span-2 px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 items-center p-3 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span class="text-sm font-semibold text-slate-700 md:col-span-1" id="obs-drains">Drains and water channels</span>
+                            <input type="text" id="obs_drains" placeholder="Observation details..." class="md:col-span-2 px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 items-center p-3 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span class="text-sm font-semibold text-slate-700 md:col-span-1" id="obs-community">Community gathering areas</span>
+                            <input type="text" id="obs_community" placeholder="Observation details..." class="md:col-span-2 px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 items-center p-3 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span class="text-sm font-semibold text-slate-700 md:col-span-1" id="obs-waste-points">Waste collection points</span>
+                            <input type="text" id="obs_waste_points" placeholder="Observation details..." class="md:col-span-2 px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Identify Common Waste -->
+                <div class="glass-card rounded-2xl p-5 sm:p-7 shadow-lg">
+                    <div class="border-b border-slate-200 pb-3 mb-5">
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Part 3</span>
+                        <h3 class="text-lg font-bold text-slate-800" id="sec3-title">12. Identify Common Waste</h3>
+                        <p class="text-xs text-slate-500 mt-1" id="sec3-desc">Tick the types of waste you observed in your village.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="flex items-center p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 cursor-pointer transition">
+                            <input type="checkbox" name="commonWaste" value="Vegetable and fruit peels" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                            <span class="ml-3 text-sm font-medium text-slate-700" id="cw-1">Vegetable and fruit peels</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 cursor-pointer transition">
+                            <input type="checkbox" name="commonWaste" value="Fallen leaves and garden waste" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                            <span class="ml-3 text-sm font-medium text-slate-700" id="cw-2">Fallen leaves and garden waste</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 cursor-pointer transition">
+                            <input type="checkbox" name="commonWaste" value="Paper and cardboard" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                            <span class="ml-3 text-sm font-medium text-slate-700" id="cw-3">Paper and cardboard</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 cursor-pointer transition">
+                            <input type="checkbox" name="commonWaste" value="Plastic packets and wrappers" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                            <span class="ml-3 text-sm font-medium text-slate-700" id="cw-4">Plastic packets and wrappers</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 cursor-pointer transition">
+                            <input type="checkbox" name="commonWaste" value="Plastic bottles" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                            <span class="ml-3 text-sm font-medium text-slate-700" id="cw-5">Plastic bottles</span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 cursor-pointer transition">
+                            <input type="checkbox" name="commonWaste" value="Glass or metal waste" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                            <span class="ml-3 text-sm font-medium text-slate-700" id="cw-6">Glass or metal waste</span>
+                        </label>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="lbl-cw-other">Other Waste Types</label>
+                        <input type="text" id="cw_other" placeholder="Specify any other types..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                    </div>
+                </div>
+
+                <!-- Section 4: Household Survey Checklist -->
+                <div class="glass-card rounded-2xl p-5 sm:p-7 shadow-lg">
+                    <div class="border-b border-slate-200 pb-3 mb-5">
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Part 4</span>
+                        <h3 class="text-lg font-bold text-slate-800" id="sec4-title">Household Survey Questions</h3>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-bold text-slate-500 uppercase bg-slate-50/50">
+                                    <th class="py-3 px-2 w-12 text-center">No.</th>
+                                    <th class="py-3 px-3" id="th-question">Survey Question</th>
+                                    <th class="py-3 px-2 text-center w-20" id="th-yes">Yes</th>
+                                    <th class="py-3 px-2 text-center w-20" id="th-no">No</th>
+                                    <th class="py-3 px-2 text-center w-24" id="th-notsure">Not Sure</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100" id="hh-survey-tbody">
+                                <!-- Populated dynamically by JS for dual language support -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section 5: Specific Waste Management Q&A -->
+                <div class="glass-card rounded-2xl p-5 sm:p-7 shadow-lg">
+                    <div class="border-b border-slate-200 pb-3 mb-5">
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Part 5</span>
+                        <h3 class="text-lg font-bold text-slate-800" id="sec5-title">Waste Collection & Management Details</h3>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-800 mb-1" id="q1-label">1. Who is responsible for waste collection in the village?</label>
+                            <input type="text" id="q_responsible" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-800 mb-1" id="q2-label">2. How often is waste collected?</label>
+                            <input type="text" id="q_frequency" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm" placeholder="e.g. Daily, Weekly, Never...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-800 mb-1" id="q3-label">3. Is wet and dry waste collected separately?</label>
+                            <div class="flex space-x-6 mt-1">
+                                <label class="flex items-center"><input type="radio" name="q_separate" value="Yes" class="w-4 h-4 text-emerald-600"> <span class="ml-2 text-sm" id="q3-yes">Yes</span></label>
+                                <label class="flex items-center"><input type="radio" name="q_separate" value="No" class="w-4 h-4 text-emerald-600"> <span class="ml-2 text-sm" id="q3-no">No</span></label>
+                                <label class="flex items-center"><input type="radio" name="q_separate" value="Partially" class="w-4 h-4 text-emerald-600"> <span class="ml-2 text-sm" id="q3-partial">Partially</span></label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-800 mb-1" id="q4-label">4. What happens to the collected waste?</label>
+                            <textarea id="q_disposal" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-800 mb-1" id="q5-label">5. What is the most common cleanliness problem in the village?</label>
+                            <textarea id="q_common_problem" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-800 mb-1" id="q6-label">6. What improvements would help the village?</label>
+                            <textarea id="q_improvements" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button Area -->
+                <div class="flex flex-col items-center justify-center space-y-3 pt-4">
+                    <button type="submit" id="submit-btn" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-base rounded-2xl shadow-lg shadow-emerald-200 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> <span id="submit-btn-text">Submit Survey Data</span>
+                    </button>
+                    <p class="text-xs text-slate-500" id="security-notice"><i class="fa-solid fa-lock mr-1 text-emerald-600"></i> Encrypted end-to-end cloud database storage</p>
+                </div>
+
+            </form>
+        </div>
+
+
+        <!-- VIEW 2: ADMIN DASHBOARD PANEL (Restricted Access) -->
+        <div id="admin-dashboard-view" class="hidden space-y-8">
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900" id="admin-dash-title">Master Village Survey Submissions</h2>
+                    <p class="text-sm text-slate-500" id="admin-dash-sub">Restricted view: Access granted for adibesra69@gmail.com (Srijan Besra)</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="export-csv-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-semibold rounded-xl shadow transition flex items-center">
+                        <i class="fa-solid fa-file-csv mr-2 text-emerald-400 text-base"></i> Export to CSV
+                    </button>
+                    <button id="back-to-form-btn" class="px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs sm:text-sm font-semibold rounded-xl transition">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i> Form View
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Total Responses</p>
+                        <h4 class="text-2xl font-black text-slate-800" id="stat-total-count">0</h4>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-tree-city"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Villages Surveyed</p>
+                        <h4 class="text-2xl font-black text-slate-800" id="stat-villages-count">0</h4>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Active Surveyors</p>
+                        <h4 class="text-2xl font-black text-slate-800" id="stat-users-count">0</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submissions Table Card -->
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h3 class="font-bold text-slate-800 text-lg">All Collected Surveys</h3>
+                    <div class="w-full sm:w-64 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                        <input type="text" id="admin-search-input" placeholder="Search village, user, block..." class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold border-b border-slate-200">
+                                <th class="py-3 px-4">Date & Time</th>
+                                <th class="py-3 px-4">Surveyor Name</th>
+                                <th class="py-3 px-4">Village Name</th>
+                                <th class="py-3 px-4">Gram Panchayat</th>
+                                <th class="py-3 px-4">Block / District</th>
+                                <th class="py-3 px-4 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-tbody" class="divide-y divide-slate-100">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal for Detailed Response View -->
+    <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 sm:p-8 space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-4">
+                <div>
+                    <h3 class="font-bold text-xl text-slate-800" id="modal-title">Survey Details</h3>
+                    <p class="text-xs text-slate-500" id="modal-subtitle">Full response record</p>
+                </div>
+                <button id="close-modal-btn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="modal-body-content" class="space-y-4 text-sm text-slate-700">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2"></div>
+
+    <!-- Firebase JS SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            GoogleAuthProvider, 
+            signInWithPopup, 
+            signInWithCustomToken, 
+            signInAnonymously, 
+            onAuthStateChanged, 
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            addDoc, 
+            onSnapshot, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase Setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'village-waste-survey';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-api-key",
+            authDomain: "demo.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Language Dictionary (English & Bengali)
+        const i18n = {
+            en: {
+                navTitle: "Gram Swachhata",
+                navSubtitle: "Village Sanitation & Waste Survey",
+                loginBtn: "Sign in with Google",
+                bannerTitle: "Google Authentication Required",
+                bannerDesc: "Please log in with Google to fill out or view survey details securely.",
+                adminNotice: "Welcome Admin, Srijan Besra!",
+                adminNoticeSub: "You have total access to view and manage all village survey submissions.",
+                btnDash: "Switch to Admin Dashboard",
+                btnForm: "Switch to Survey Form",
+                formBadge: "Village Observation",
+                formMainTitle: "My Village Waste & Sanitation Survey",
+                formMainDesc: "Help us keep our rural communities clean and hygienic by filling out this observation questionnaire.",
+                sec0Title: "Survey Participant Information",
+                lblRealName: "Full Name (Real Name) *",
+                hintRealName: "Enter your complete verified name.",
+                lblEmail: "Logged In Email",
+                sec1Title: "10. General Information About My Village",
+                lblVillage: "Name of the village *",
+                lblGramPanchayat: "Gram Panchayat *",
+                lblBlock: "Block *",
+                lblDistrict: "District *",
+                lblState: "State",
+                lblHouseholds: "Approximate number of households (if known)",
+                sec2Title: "11. Observation Points & Field Notes",
+                sec2Desc: "What did you observe at the following locations in your village?",
+                obsRoads: "Roads and streets",
+                obsSchool: "School surroundings",
+                obsMarket: "Local market or shops",
+                obsWater: "Public water points",
+                obsDrains: "Drains and water channels",
+                obsCommunity: "Community gathering areas",
+                obsWastePoints: "Waste collection points",
+                sec3Title: "12. Identify Common Waste",
+                sec3Desc: "Tick the types of waste you observed in your village.",
+                cw1: "Vegetable and fruit peels",
+                cw2: "Fallen leaves and garden waste",
+                cw3: "Paper and cardboard",
+                cw4: "Plastic packets and wrappers",
+                cw5: "Plastic bottles",
+                cw6: "Glass or metal waste",
+                lblCwOther: "Other Waste Types",
+                sec4Title: "Household Survey Questions",
+                thQuestion: "Survey Question",
+                thYes: "Yes",
+                thNo: "No",
+                thNotSure: "Not Sure",
+                sec5Title: "Waste Collection & Management Details",
+                q1Label: "1. Who is responsible for waste collection in the village?",
+                q2Label: "2. How often is waste collected?",
+                q3Label: "3. Is wet and dry waste collected separately?",
+                q3Yes: "Yes",
+                q3No: "No",
+                q3Partial: "Partially",
+                q4Label: "4. What happens to the collected waste?",
+                q5Label: "5. What is the most common cleanliness problem in the village?",
+                q6Label: "6. What improvements would help the village?",
+                submitBtn: "Submit Survey Data",
+                securityNotice: "Encrypted end-to-end cloud database storage"
+            },
+            bn: {
+                navTitle: "গ্রাম পরিচ্ছন্নতা",
+                navSubtitle: "গ্রামের বর্জ্য ও পয়ঃনিষ্কাশন জরিপ",
+                loginBtn: "গুগল দিয়ে সাইন ইন করুন",
+                bannerTitle: "গুগল প্রমাণীকরণ প্রয়োজনীয়",
+                bannerDesc: "নিরাপদে সার্ভে তথ্য পূরণ বা দেখার জন্য অনুগ্রহ করে গুগল দিয়ে লগইন করুন।",
+                adminNotice: "স্বাগতম অ্যাডমিন, সৃজন বেসরা!",
+                adminNoticeSub: "আপনার কাছে সমস্ত গ্রামের জরিপের তথ্য দেখার এবং পরিচালনা করার সম্পূর্ণ অ্যাক্সেস রয়েছে।",
+                btnDash: "অ্যাডমিন ড্যাশবোর্ডে যান",
+                btnForm: "সার্ভে ফর্মে যান",
+                formBadge: "গ্রাম পর্যবেক্ষণ",
+                formMainTitle: "আমার গ্রামের বর্জ্য ও পরিচ্ছন্নতা জরিপ",
+                formMainDesc: "এই পর্যবেক্ষণ প্রশ্নাবলী পূরণ করে আমাদের গ্রামীণ সম্প্রদায়কে পরিষ্কার এবং স্বাস্থ্যকর রাখতে সাহায্য করুন।",
+                sec0Title: "জরিপ অংশগ্রহণকারীর তথ্য",
+                lblRealName: "সম্পূর্ণ নাম (প্রকৃত নাম) *",
+                hintRealName: "আপনার আসল সম্পূর্ণ নাম লিখুন।",
+                lblEmail: "লগইন ইমেল",
+                sec1Title: "১০. আমার গ্রাম সম্পর্কে সাধারণ তথ্য",
+                lblVillage: "গ্রামের নাম *",
+                lblGramPanchayat: "গ্রাম পঞ্চায়েত *",
+                lblBlock: "ব্লক *",
+                lblDistrict: "জেলা *",
+                lblState: "রাজ্য",
+                lblHouseholds: "আনুমানিক পরিবারের সংখ্যা (জানা থাকলে)",
+                sec2Title: "১১. পর্যবেক্ষণ স্থান এবং নোট",
+                sec2Desc: "আপনার গ্রামের নিচের স্থানগুলোতে আপনি কী পর্যবেক্ষণ করেছেন?",
+                obsRoads: "রাস্তাঘাট ও সড়ক",
+                obsSchool: "বিদ্যালয় চত্বর",
+                obsMarket: "স্থানীয় বাজার বা দোকানপাট",
+                obsWater: "পাবলিক পানির স্থান",
+                obsDrains: "নর্দমা ও জলের নালা",
+                obsCommunity: "জনসাধারণের একত্রিত হওয়ার স্থান",
+                obsWastePoints: "বর্জ্য ফেলার স্থান",
+                sec3Title: "১২. সাধারণ বর্জ্য চিহ্নিতকরণ",
+                sec3Desc: "আপনার গ্রামে পর্যবেক্ষণ করা বর্জ্যের ধরনগুলোতে টিক চিহ্ন দিন।",
+                cw1: "শাকসবজি ও ফলের খোসা",
+                cw2: "ঝরা পাতা ও বাগানের বর্জ্য",
+                cw3: "কাগজ ও পিচবোর্ড",
+                cw4: "প্লাস্টিকের প্যাকেট ও মোড়ক",
+                cw5: "প্লাস্টিকের বোতল",
+                cw6: "কাঁচ বা ধাতব বর্জ্য",
+                lblCwOther: "অন্যান্য বর্জ্য",
+                sec4Title: "পারিবারিক জরিপ প্রশ্নাবলী",
+                thQuestion: "জরিপ প্রশ্ন",
+                thYes: "হ্যাঁ",
+                thNo: "না",
+                thNotSure: "নিশ্চিত নয়",
+                sec5Title: "বর্জ্য সংগ্রহ ও ব্যবস্থাপনার বিস্তারিত",
+                q1Label: "১. গ্রামে বর্জ্য সংগ্রহের দায়িত্ব কার?",
+                q2Label: "২. কত ঘন ঘন বর্জ্য সংগ্রহ করা হয়?",
+                q3Label: "৩. ভিজা ও শুকনো বর্জ্য কি আলাদাভাবে সংগ্রহ করা হয়?",
+                q3Yes: "হ্যাঁ",
+                q3No: "না",
+                q3Partial: "আংশিকভাবে",
+                q4Label: "৪. সংগৃহীত বর্জ্যের কী করা হয়?",
+                q5Label: "৫. গ্রামের সবচেয়ে সাধারণ পরিচ্ছন্নতা সমস্যা কী?",
+                q6Label: "৬. কোন উন্নতিগুলো গ্রামের জন্য সহায়ক হবে?",
+                submitBtn: "জরিপের তথ্য জমা দিন",
+                securityNotice: "নিরাপদ ক্লাউড ডেটাবেস সঞ্চয়স্থান"
+            }
+        };
+
+        const householdQuestions = [
+            { id: "hh1", en: "1. Does the household separate wet and dry waste?", bn: "১. পরিবার কি ভিজা ও শুকনো বর্জ্য আলাদা করে?" },
+            { id: "hh2", en: "2. Is household waste collected regularly?", bn: "২. গৃহস্থালির বর্জ্য কি নিয়মিত সংগ্রহ করা হয়?" },
+            { id: "hh3", en: "3. Does the household reuse containers or bags?", bn: "৩. পরিবার কি পাত্র বা ব্যাগ পুনরায় ব্যবহার করে?" },
+            { id: "hh4", en: "4. Does the household avoid littering in public places?", bn: "৪. পরিবার কি পাবলিক স্থানে আবর্জনা ফেলা এড়িয়ে চলে?" },
+            { id: "hh5", en: "5. Does the household know about composting?", bn: "৫. পরিবার কি কম্পোস্টিং বা জৈব সার তৈরি সম্পর্কে জানে?" },
+            { id: "hh6", en: "6. Does the household use a dustbin?", bn: "৬. পরিবার কি ডাস্টবিন ব্যবহার করে?" },
+            { id: "hh7", en: "7. Does the household know where to report waste-related problems?", bn: "৭. পরিবার কি জানে বর্জ্য সংক্রান্ত সমস্যা কোথায় রিপোর্ট করতে হয়?" }
+        ];
+
+        // App State
+        let currentLang = 'en';
+        let currentUser = null;
+        let isAdmin = false;
+        let allSubmissions = [];
+
+        // DOM Elements
+        const langToggleBtn = document.getElementById('lang-toggle-btn');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const bannerLoginBtn = document.getElementById('banner-login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userProfileBadge = document.getElementById('user-profile-badge');
+        const userAvatar = document.getElementById('user-avatar');
+        const userDisplayName = document.getElementById('user-display-name');
+        const loginBanner = document.getElementById('login-banner');
+        const adminNoticeBadge = document.getElementById('admin-notice-badge');
+        const userFullNameInput = document.getElementById('user-full-name');
+        const userEmailDisplay = document.getElementById('user-email-display');
+
+        const surveyFormView = document.getElementById('survey-form-view');
+        const adminDashboardView = document.getElementById('admin-dashboard-view');
+        const toggleViewBtn = document.getElementById('toggle-view-btn');
+        const backToFormBtn = document.getElementById('back-to-form-btn');
+        const toggleViewText = document.getElementById('toggle-view-text');
+
+        // Init Language Renderer
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = i18n[lang];
+
+            document.getElementById('lang-label').innerText = lang === 'en' ? 'বাংলা' : 'English';
+            document.getElementById('nav-title').innerText = t.navTitle;
+            document.getElementById('nav-subtitle').innerText = t.navSubtitle;
+            document.getElementById('login-btn-text').innerText = t.loginBtn;
+            document.getElementById('banner-title').innerText = t.bannerTitle;
+            document.getElementById('banner-desc').innerText = t.bannerDesc;
+            document.getElementById('banner-btn-text').innerText = t.loginBtn;
+            document.getElementById('admin-welcome-text').innerText = t.adminNotice;
+            document.getElementById('admin-welcome-sub').innerText = t.adminNoticeSub;
+            
+            document.getElementById('form-badge').innerText = t.formBadge;
+            document.getElementById('form-main-title').innerText = t.formMainTitle;
+            document.getElementById('form-main-desc').innerText = t.formMainDesc;
+
+            document.getElementById('sec0-title').innerHTML = `<i class="fa-solid fa-id-card text-emerald-600 mr-2"></i> ${t.sec0Title}`;
+            document.getElementById('lbl-real-name').innerText = t.lblRealName;
+            document.getElementById('hint-real-name').innerText = t.hintRealName;
+            document.getElementById('lbl-email').innerText = t.lblEmail;
+
+            document.getElementById('sec1-title').innerText = t.sec1Title;
+            document.getElementById('lbl-village-name').innerText = t.lblVillage;
+            document.getElementById('lbl-gram-panchayat').innerText = t.lblGramPanchayat;
+            document.getElementById('lbl-block').innerText = t.lblBlock;
+            document.getElementById('lbl-district').innerText = t.lblDistrict;
+            document.getElementById('lbl-state').innerText = t.lblState;
+            document.getElementById('lbl-households').innerText = t.lblHouseholds;
+
+            document.getElementById('sec2-title').innerText = t.sec2Title;
+            document.getElementById('sec2-desc').innerText = t.sec2Desc;
+            document.getElementById('obs-roads').innerText = t.obsRoads;
+            document.getElementById('obs-school').innerText = t.obsSchool;
+            document.getElementById('obs-market').innerText = t.obsMarket;
+            document.getElementById('obs-water').innerText = t.obsWater;
+            document.getElementById('obs-drains').innerText = t.obsDrains;
+            document.getElementById('obs-community').innerText = t.obsCommunity;
+            document.getElementById('obs-waste-points').innerText = t.obsWastePoints;
+
+            document.getElementById('sec3-title').innerText = t.sec3Title;
+            document.getElementById('sec3-desc').innerText = t.sec3Desc;
+            document.getElementById('cw-1').innerText = t.cw1;
+            document.getElementById('cw-2').innerText = t.cw2;
+            document.getElementById('cw-3').innerText = t.cw3;
+            document.getElementById('cw-4').innerText = t.cw4;
+            document.getElementById('cw-5').innerText = t.cw5;
+            document.getElementById('cw-6').innerText = t.cw6;
+            document.getElementById('lbl-cw-other').innerText = t.lblCwOther;
+
+            document.getElementById('sec4-title').innerText = t.sec4Title;
+            document.getElementById('th-question').innerText = t.thQuestion;
+            document.getElementById('th-yes').innerText = t.thYes;
+            document.getElementById('th-no').innerText = t.thNo;
+            document.getElementById('th-notsure').innerText = t.thNotSure;
+
+            document.getElementById('sec5-title').innerText = t.sec5Title;
+            document.getElementById('q1-label').innerText = t.q1Label;
+            document.getElementById('q2-label').innerText = t.q2Label;
+            document.getElementById('q3-label').innerText = t.q3Label;
+            document.getElementById('q3-yes').innerText = t.q3Yes;
+            document.getElementById('q3-no').innerText = t.q3No;
+            document.getElementById('q3-partial').innerText = t.q3Partial;
+            document.getElementById('q4-label').innerText = t.q4Label;
+            document.getElementById('q5-label').innerText = t.q5Label;
+            document.getElementById('q6-label').innerText = t.q6Label;
+
+            document.getElementById('submit-btn-text').innerText = t.submitBtn;
+            document.getElementById('security-notice').innerHTML = `<i class="fa-solid fa-lock mr-1 text-emerald-600"></i> ${t.securityNotice}`;
+
+            renderHouseholdQuestions();
+        }
+
+        // Render Table for Part 4 Household Questions
+        function renderHouseholdQuestions() {
+            const tbody = document.getElementById('hh-survey-tbody');
+            tbody.innerHTML = '';
+
+            householdQuestions.forEach((q, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-emerald-50/50 transition';
+                const questionText = currentLang === 'en' ? q.en : q.bn;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-2 text-center font-bold text-slate-400 text-xs">${idx + 1}</td>
+                    <td class="py-3 px-3 text-slate-800 font-medium text-xs sm:text-sm">${questionText}</td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="radio" name="${q.id}" value="Yes" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer" required>
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="radio" name="${q.id}" value="No" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="radio" name="${q.id}" value="Not Sure" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Auth Logic & Admin Validation
+        async function handleGoogleLogin() {
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+                showToast("Login Successful!", "success");
+            } catch (err) {
+                console.warn("Popup login standard error, attempting custom token fallback:", err);
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    showToast("Signed in successfully!", "success");
+                } catch (e) {
+                    showToast("Login error: " + e.message, "error");
+                }
+            }
+        }
+
+        // Check if admin
+        function checkAdminStatus(email, fullName) {
+            const cleanEmail = (email || '').trim().toLowerCase();
+            const cleanName = (fullName || '').trim();
+
+            // Explicit Admin Access Criteria: adibesra69@gmail.com + Srijan Besra
+            if (cleanEmail === 'adibesra69@gmail.com' && (cleanName === 'Srijan Besra' || cleanName.toLowerCase().includes('srijan'))) {
+                return true;
+            }
+            return false;
+        }
+
+        function updateAdminUI() {
+            const name = userFullNameInput.value;
+            const email = currentUser ? currentUser.email : '';
+            
+            isAdmin = checkAdminStatus(email, name);
+
+            if (isAdmin) {
+                adminNoticeBadge.classList.remove('hidden');
+            } else {
+                adminNoticeBadge.classList.add('hidden');
+                // If viewing admin dash and loses status, kick back to form
+                if (!adminDashboardView.classList.contains('hidden')) {
+                    adminDashboardView.classList.add('hidden');
+                    surveyFormView.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Auth Listener
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                userProfileBadge.classList.remove('hidden');
+                googleLoginBtn.classList.add('hidden');
+                loginBanner.classList.add('hidden');
+
+                userDisplayName.innerText = user.displayName || user.email || 'User';
+                userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=059669&color=fff`;
+                
+                userEmailDisplay.value = user.email || 'authenticated-user@gmail.com';
+                
+                if (!userFullNameInput.value && user.displayName) {
+                    userFullNameInput.value = user.displayName;
+                }
+
+                updateAdminUI();
+                listenToFirestoreSubmissions();
+            } else {
+                userProfileBadge.classList.add('hidden');
+                googleLoginBtn.classList.remove('hidden');
+                loginBanner.classList.remove('hidden');
+                userEmailDisplay.value = '';
+                adminNoticeBadge.classList.add('hidden');
+            }
+        });
+
+        // Real-time Firestore Sync
+        function listenToFirestoreSubmissions() {
+            if (!currentUser) return;
+
+            // Strict MANDATORY Path Rule: /artifacts/{appId}/public/data/{collectionName}
+            const publicCollection = collection(db, 'artifacts', appId, 'public', 'data', 'village_surveys');
+
+            onSnapshot(publicCollection, (snapshot) => {
+                allSubmissions = [];
+                snapshot.forEach(doc => {
+                    allSubmissions.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort by date descending in memory (Rule 2)
+                allSubmissions.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                renderAdminDashboard(allSubmissions);
+            }, (error) => {
+                console.error("Firestore Error:", error);
+            });
+        }
+
+        // Admin Table & Stats Render
+        function renderAdminDashboard(data) {
+            const tbody = document.getElementById('admin-table-tbody');
+            tbody.innerHTML = '';
+
+            document.getElementById('stat-total-count').innerText = data.length;
+            
+            const uniqueVillages = new Set(data.map(d => (d.villageName || '').trim().toLowerCase())).size;
+            document.getElementById('stat-villages-count').innerText = uniqueVillages;
+
+            const uniqueUsers = new Set(data.map(d => d.userEmail || d.userId)).size;
+            document.getElementById('stat-users-count').innerText = uniqueUsers;
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">No survey responses submitted yet.</td></tr>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const dateStr = item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleString() : 'N/A';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-mono text-slate-500 text-xs">${dateStr}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">${item.userFullName || 'Anonymous'} <br><span class="text-[11px] font-normal text-slate-400">${item.userEmail || ''}</span></td>
+                    <td class="py-3 px-4 text-emerald-700 font-bold">${item.villageName || 'N/A'}</td>
+                    <td class="py-3 px-4 text-slate-600">${item.gramPanchayat || 'N/A'}</td>
+                    <td class="py-3 px-4 text-slate-600">${item.block || 'N/A'}, ${item.district || 'N/A'}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button class="view-detail-btn px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200 transition" data-id="${item.id}">
+                            <i class="fa-solid fa-eye mr-1"></i> View
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Bind click events to View buttons
+            document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const docId = e.currentTarget.getAttribute('data-id');
+                    const record = allSubmissions.find(s => s.id === docId);
+                    if (record) showDetailModal(record);
+                });
+            });
+        }
+
+        // Search Filter for Admin
+        document.getElementById('admin-search-input')?.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allSubmissions.filter(item => {
+                return (item.villageName || '').toLowerCase().includes(query) ||
+                       (item.userFullName || '').toLowerCase().includes(query) ||
+                       (item.gramPanchayat || '').toLowerCase().includes(query) ||
+                       (item.block || '').toLowerCase().includes(query);
+            });
+            renderAdminDashboard(filtered);
+        });
+
+        // Form Submission Logic
+        document.getElementById('surveyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentUser) {
+                showToast("Please Sign In with Google before submitting!", "error");
+                handleGoogleLogin();
+                return;
+            }
+
+            const fullName = userFullNameInput.value.trim();
+            if (!fullName) {
+                showToast("Please enter your Real Full Name.", "error");
+                userFullNameInput.focus();
+                return;
+            }
+
+            // Gather Common Waste Checkboxes
+            const commonWasteSelected = Array.from(document.querySelectorAll('input[name="commonWaste"]:checked')).map(cb => cb.value);
+
+            // Gather Household Survey Table Answers
+            const hhAnswers = {};
+            householdQuestions.forEach(q => {
+                const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+                hhAnswers[q.id] = selected ? selected.value : "Not Answered";
+            });
+
+            const formData = {
+                userId: currentUser.uid,
+                userEmail: currentUser.email || userEmailDisplay.value,
+                userFullName: fullName,
+                villageName: document.getElementById('villageName').value.trim(),
+                gramPanchayat: document.getElementById('gramPanchayat').value.trim(),
+                block: document.getElementById('block').value.trim(),
+                district: document.getElementById('district').value.trim(),
+                state: document.getElementById('state').value,
+                households: document.getElementById('households').value || "N/A",
+                observations: {
+                    roads: document.getElementById('obs_roads').value,
+                    school: document.getElementById('obs_school').value,
+                    market: document.getElementById('obs_market').value,
+                    water: document.getElementById('obs_water').value,
+                    drains: document.getElementById('obs_drains').value,
+                    community: document.getElementById('obs_community').value,
+                    wastePoints: document.getElementById('obs_waste_points').value,
+                },
+                commonWaste: commonWasteSelected,
+                cwOther: document.getElementById('cw_other').value,
+                householdChecklist: hhAnswers,
+                qa: {
+                    responsible: document.getElementById('q_responsible').value,
+                    frequency: document.getElementById('q_frequency').value,
+                    separate: document.querySelector('input[name="q_separate"]:checked')?.value || "N/A",
+                    disposal: document.getElementById('q_disposal').value,
+                    commonProblem: document.getElementById('q_common_problem').value,
+                    improvements: document.getElementById('q_improvements').value
+                },
+                timestamp: serverTimestamp()
+            };
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50');
+
+            try {
+                // Save to Firestore Public collection for admin access
+                const publicCollection = collection(db, 'artifacts', appId, 'public', 'data', 'village_surveys');
+                await addDoc(publicCollection, formData);
+
+                showToast("Survey submitted successfully!", "success");
+                document.getElementById('surveyForm').reset();
+                userEmailDisplay.value = currentUser.email || '';
+                userFullNameInput.value = fullName; // retain name
+            } catch (err) {
+                showToast("Error submitting survey: " + err.message, "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50');
+            }
+        });
+
+        // View Modal Details
+        function showDetailModal(record) {
+            const modal = document.getElementById('detail-modal');
+            const body = document.getElementById('modal-body-content');
+            document.getElementById('modal-title').innerText = `${record.villageName || 'Village'} Survey Report`;
+            document.getElementById('modal-subtitle').innerText = `Submitted by ${record.userFullName} (${record.userEmail})`;
+
+            let hhHtml = '';
+            householdQuestions.forEach(q => {
+                const ans = record.householdChecklist ? record.householdChecklist[q.id] : 'N/A';
+                hhHtml += `<div class="flex justify-between border-b border-slate-100 py-1"><span class="text-xs text-slate-600">${q.en}</span> <span class="font-bold text-xs ${ans==='Yes'?'text-emerald-600':ans==='No'?'text-red-500':'text-amber-600'}">${ans}</span></div>`;
+            });
+
+            body.innerHTML = `
+                <div class="grid grid-cols-2 gap-3 bg-emerald-50 p-4 rounded-xl text-xs">
+                    <div><strong>Gram Panchayat:</strong> ${record.gramPanchayat}</div>
+                    <div><strong>Block:</strong> ${record.block}</div>
+                    <div><strong>District:</strong> ${record.district}</div>
+                    <div><strong>Households:</strong> ${record.households}</div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-emerald-700">Observations</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl">
+                        <p><strong>Roads:</strong> ${record.observations?.roads || 'N/A'}</p>
+                        <p><strong>School:</strong> ${record.observations?.school || 'N/A'}</p>
+                        <p><strong>Market:</strong> ${record.observations?.market || 'N/A'}</p>
+                        <p><strong>Water:</strong> ${record.observations?.water || 'N/A'}</p>
+                        <p><strong>Drains:</strong> ${record.observations?.drains || 'N/A'}</p>
+                        <p><strong>Community:</strong> ${record.observations?.community || 'N/A'}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-emerald-700">Common Waste Identified</h4>
+                    <p class="text-xs bg-slate-50 p-3 rounded-xl">${(record.commonWaste || []).join(', ') || 'None selected'} ${record.cwOther ? `(${record.cwOther})` : ''}</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-emerald-700">Household Checklist Answers</h4>
+                    <div class="bg-slate-50 p-3 rounded-xl space-y-1">
+                        ${hhHtml}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-emerald-700">Collection & Management Q&A</h4>
+                    <div class="text-xs bg-slate-50 p-3 rounded-xl space-y-2">
+                        <p><strong>Responsible:</strong> ${record.qa?.responsible || 'N/A'}</p>
+                        <p><strong>Frequency:</strong> ${record.qa?.frequency || 'N/A'}</p>
+                        <p><strong>Separated:</strong> ${record.qa?.separate || 'N/A'}</p>
+                        <p><strong>Disposal Process:</strong> ${record.qa?.disposal || 'N/A'}</p>
+                        <p><strong>Main Problem:</strong> ${record.qa?.commonProblem || 'N/A'}</p>
+                        <p><strong>Improvements Needed:</strong> ${record.qa?.improvements || 'N/A'}</p>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+        });
+
+        // Export to CSV Functionality for Admin
+        document.getElementById('export-csv-btn')?.addEventListener('click', () => {
+            if (!allSubmissions || allSubmissions.length === 0) {
+                showToast("No data to export!", "error");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Date,Surveyor Name,Email,Village,Gram Panchayat,Block,District,Households,Responsible,Frequency,Separated,Common Problem\n";
+
+            allSubmissions.forEach(row => {
+                const date = row.timestamp ? new Date(row.timestamp.seconds * 1000).toISOString().split('T')[0] : '';
+                const line = [
+                    `"${date}"`,
+                    `"${row.userFullName || ''}"`,
+                    `"${row.userEmail || ''}"`,
+                    `"${row.villageName || ''}"`,
+                    `"${row.gramPanchayat || ''}"`,
+                    `"${row.block || ''}"`,
+                    `"${row.district || ''}"`,
+                    `"${row.households || ''}"`,
+                    `"${row.qa?.responsible || ''}"`,
+                    `"${row.qa?.frequency || ''}"`,
+                    `"${row.qa?.separate || ''}"`,
+                    `"${(row.qa?.commonProblem || '').replace(/"/g, '""')}"`
+                ].join(",");
+                csvContent += line + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Village_Waste_Survey_Report_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Toggle View Event Listener
+        toggleViewBtn.addEventListener('click', () => {
+            if (adminDashboardView.classList.contains('hidden')) {
+                surveyFormView.classList.add('hidden');
+                adminDashboardView.classList.remove('hidden');
+                toggleViewText.innerText = i18n[currentLang].btnForm;
+            } else {
+                adminDashboardView.classList.add('hidden');
+                surveyFormView.classList.remove('hidden');
+                toggleViewText.innerText = i18n[currentLang].btnDash;
+            }
+        });
+
+        backToFormBtn.addEventListener('click', () => {
+            adminDashboardView.classList.add('hidden');
+            surveyFormView.classList.remove('hidden');
+            toggleViewText.innerText = i18n[currentLang].btnDash;
+        });
+
+        // Real-name live check for admin trigger
+        userFullNameInput.addEventListener('input', updateAdminUI);
+
+        // Language Switch Button Listener
+        langToggleBtn.addEventListener('click', () => {
+            setLanguage(currentLang === 'en' ? 'bn' : 'en');
+        });
+
+        // Google Login / Logout Actions
+        googleLoginBtn.addEventListener('click', handleGoogleLogin);
+        bannerLoginBtn.addEventListener('click', handleGoogleLogin);
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => showToast("Logged out", "info"));
+        });
+
+        // Helper Toast Notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-700' : type === 'error' ? 'bg-rose-600' : 'bg-slate-800';
+            
+            toast.className = `${bgColor} text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 transition-all transform translate-y-2 opacity-0`;
+            toast.innerHTML = `
+                <i class="${type === 'success' ? 'fa-solid fa-circle-check' : type === 'error' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-info-circle'} text-base"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Initialize UI
+        setLanguage('en');
+
+    </script>
+</body>
+</html>
